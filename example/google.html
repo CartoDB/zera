@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+
+        #city {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: white;
+            width: 200px;
+            height: 60px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <div id="city"></div>
+    <script src="../dist/gridjson.bundle.js"></script>
+    <script>
+        function initMap() {
+            var uluru = { lat: 42, lng: -0.08 };
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 5,
+                center: uluru
+            });
+
+            window.foo = map;
+
+            new gridjson.Interactive()
+                .map(map)
+                .tilejson({
+                    grids: ["https://cartojs-test.carto.com/api/v1/map/f2cbe0706e65d9becee338e4900802a8:1508844385822/1/{z}/{x}/{y}.grid.json?api_key=84fdbd587e4a942510270a48e843b4c1baa11e18"]
+                })
+                .on('on', event => {
+                    console.log(event);
+                    document.querySelector('#city').innerHTML = `<h3> ${event.data.nameascii} </h3>`;
+                })
+                .on('off', event => {
+                    document.querySelector('#city').innerHTML = '';
+                });
+        }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap">
+    </script>
+</body>
+
+</html>
