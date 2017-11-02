@@ -1,7 +1,7 @@
 {
   "name": "carto-gridjson",
   "version": "1.0.0",
-  "main": "gridjson.bundle.js",
+  "main": "dist/gridjson.bundle.js",
   "license": "MIT",
   "dependencies": {
     "eslint": "^4.6.1",
