@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet-src.js"></script>
+    <script src="../dist/gridjson.bundle.js"></script>
+    <style>
+        #map {
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+</body>
+<script>
+    var map = L.map('map').setView([42, -0.08], 5);
+    var baseLayer = L.tileLayer('https://cartodb-basemaps-d.global.ssl.fastly.net/rastertiles/voyager_nolabels/{z}/{x}/{y}.png');
+    var cartoLayer = L.tileLayer('https://cartojs-test.carto.com/api/v1/map/f2cbe0706e65d9becee338e4900802a8:1508844385822/1/{z}/{x}/{y}.png?api_key=84fdbd587e4a942510270a48e843b4c1baa11e18');
+
+    baseLayer.addTo(map);
+    cartoLayer.addTo(map);
+
+    var poup = L.popup();
+    new gridjson.Interactive()
+        .map(map)
+        .tilejson({
+            grids: ["http://localhost:3000/api/v1/map/f2cbe0706e65d9becee338e4900802a8:1508844385822/1/{z}/{x}/{y}.grid.json?api_key=84fdbd587e4a942510270a48e843b4c1baa11e18"]
+        })
+        .on('on', event => {
+            poup.setLatLng(event.latlng);
+            poup.setContent(`<h5>${event.data.nameascii}</h5>`);
+            poup.openOn(map);
+        })
+        .on('off', event => {
+            map.closePopup(poup);
+        })
+        .on('error', event => {
+            console.log(event);
+        });
+
+
+
+</script>
+
+</html>
