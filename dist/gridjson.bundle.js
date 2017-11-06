@@ -340,8 +340,11 @@ var Interactive = function () {
             // 4 pixels asigned to each grid in the utfGrid.
             var resolution = 4;
             // get the tile coords to which the pixel belongs
-            var x = this._unscale(point.x);
-            var y = this._unscale(point.y);
+
+            var _unscale2 = this._unscale(point, this._tileSize),
+                x = _unscale2.x,
+                y = _unscale2.y;
+
             var max = Math.pow(2, this._map.getZoom());
             x = (x + max) % max;
             y = (y + max) % max;
