@@ -1,5 +1,5 @@
 {
-  "name": "carto-gridjson",
+  "name": "@carto/zera",
   "version": "1.0.0",
   "main": "dist/gridjson.bundle.js",
   "license": "MIT",
