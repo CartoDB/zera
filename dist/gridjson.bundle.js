@@ -223,7 +223,7 @@ var Interactive = function () {
         value: function _onMapClick(e) {
             var _this2 = this;
 
-            var eventClone = this._clone(e);
+            var eventClone = this._map.cloneEvent(e);
             var coords = this._getTileCoordsFromMouseEvent(eventClone);
             this._loadTile(coords.z, coords.x, coords.y).then(function () {
                 return _this2._objectForEvent(eventClone, 'click');
@@ -240,7 +240,7 @@ var Interactive = function () {
         value: function _onMapMouseMove(e) {
             var _this3 = this;
 
-            var eventClone = this._clone(e);
+            var eventClone = this._map.cloneEvent(e);
             var coords = this._getTileCoordsFromMouseEvent(eventClone);
             this._loadTile(coords.z, coords.x, coords.y).then(function () {
                 return _this3._objectForEvent(eventClone, 'mousemove');
@@ -333,12 +333,14 @@ var Interactive = function () {
          * Using the event coords, get the data from the grid.json data stored in the cache.
          * 
          * This method Trigger an event with a `data` property. 
+         * 
+         * Warning: This method mutates the event object!
          */
 
     }, {
         key: '_objectForEvent',
-        value: function _objectForEvent(e, eventType) {
-            var point = this._map.project(e);
+        value: function _objectForEvent(event, eventType) {
+            var point = this._map.project(event);
             // 4 pixels asigned to each grid in the utfGrid.
             var resolution = 4;
             // get the tile coords to which the pixel belongs
@@ -360,14 +362,14 @@ var Interactive = function () {
                 var key = tile.keys[idx];
                 if (tile.data.hasOwnProperty(key)) {
                     // Extend the event with the data from the grid json
-                    e.data = tile.data[key];
+                    event.data = tile.data[key];
                 }
             }
 
             // Add "e" property for backwards compatibility with wax.
-            e.e = e.originalEvent || { type: eventType };
+            event.e = event.originalEvent || { type: eventType };
 
-            this._triggerEvent(eventType, e);
+            this._triggerEvent(eventType, event);
         }
 
         /**
@@ -420,17 +422,6 @@ var Interactive = function () {
                 char--;
             }
             return char - 32;
-        }
-
-        /**
-         * Clone an object
-         * @param {object} object 
-         */
-
-    }, {
-        key: '_clone',
-        value: function _clone(object) {
-            return JSON.parse(JSON.stringify(object));
         }
     }]);
 
@@ -502,6 +493,18 @@ var GoogleMap = function () {
         value: function on(event, callback) {
             this._map.addListener(event, callback);
         }
+
+        // We need to clone events to avoid mutations causing buggy behaviour
+
+    }, {
+        key: "cloneEvent",
+        value: function cloneEvent(event) {
+            return {
+                da: event.da,
+                latLng: event.latLng,
+                pixel: event.pixel
+            };
+        }
     }]);
 
     return GoogleMap;
@@ -544,7 +547,22 @@ var LeafletMap = function () {
     }, {
         key: "on",
         value: function on(event, callback) {
-            this._map.on(event, callback);
+            return this._map.on(event, callback);
+        }
+
+        // We need to clone events to avoid mutations causing buggy behaviour
+
+    }, {
+        key: "cloneEvent",
+        value: function cloneEvent(event) {
+            return {
+                containerPoint: event.containerPoint,
+                latlng: event.latlng,
+                layerPoint: event.layerPoint,
+                originalEvent: event.originalEvent,
+                target: event.target,
+                type: event.type
+            };
         }
     }]);
 
