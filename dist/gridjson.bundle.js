@@ -223,9 +223,10 @@ var Interactive = function () {
         value: function _onMapClick(e) {
             var _this2 = this;
 
-            var coords = this._getTileCoordsFromMouseEvent(e);
+            var eventClone = this._clone(e);
+            var coords = this._getTileCoordsFromMouseEvent(eventClone);
             this._loadTile(coords.z, coords.x, coords.y).then(function () {
-                return _this2._objectForEvent(e, 'click');
+                return _this2._objectForEvent(eventClone, 'click');
             });
         }
 
@@ -239,9 +240,10 @@ var Interactive = function () {
         value: function _onMapMouseMove(e) {
             var _this3 = this;
 
-            var coords = this._getTileCoordsFromMouseEvent(e);
+            var eventClone = this._clone(e);
+            var coords = this._getTileCoordsFromMouseEvent(eventClone);
             this._loadTile(coords.z, coords.x, coords.y).then(function () {
-                return _this3._objectForEvent(e, 'mousemove');
+                return _this3._objectForEvent(eventClone, 'mousemove');
             });
         }
 
@@ -396,9 +398,10 @@ var Interactive = function () {
     }, {
         key: 'remove',
         value: function remove() {
-            this._eventEmitter.removeEventListener(this._listeners.click);
-            this._eventEmitter.removeEventListener(this._listeners.move);
-            this._eventEmitter.removeEventListener(this._listeners.out);
+            this._eventEmitter.removeEventListener('mousemove');
+            this._eventEmitter.removeEventListener('click');
+            this._eventEmitter.removeEventListener('error');
+            this._eventEmitter.removeEventListener('featureout');
         }
 
         /**
@@ -417,6 +420,17 @@ var Interactive = function () {
                 char--;
             }
             return char - 32;
+        }
+
+        /**
+         * Clone an object
+         * @param {object} object 
+         */
+
+    }, {
+        key: '_clone',
+        value: function _clone(object) {
+            return JSON.parse(JSON.stringify(object));
         }
     }]);
 
