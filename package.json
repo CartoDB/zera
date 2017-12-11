@@ -1,6 +1,6 @@
 {
   "name": "iagolast-zera",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/zera.js",
   "license": "MIT",
   "dependencies": {
