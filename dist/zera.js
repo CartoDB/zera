@@ -4,9 +4,9 @@
 	else if(typeof define === 'function' && define.amd)
 		define([], factory);
 	else if(typeof exports === 'object')
-		exports["gridjson"] = factory();
+		exports["zera"] = factory();
 	else
-		root["gridjson"] = factory();
+		root["zera"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -574,4 +574,4 @@ module.exports = LeafletMap;
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=gridjson.bundle.js.map
+//# sourceMappingURL=zera.js.map

@@ -5,9 +5,9 @@ module.exports = {
     devtool: 'source-map',
     output: {
         path: path.resolve(__dirname, 'dist'),
-        library: "gridjson",
-        filename: 'gridjson.bundle.js',
-        libraryTarget: "umd",
+        library: 'zera',
+        filename: 'zera.js',
+        libraryTarget: 'umd'
     },
     module: {
         rules: [

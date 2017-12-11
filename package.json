@@ -1,7 +1,7 @@
 {
   "name": "@iagolast/zera",
   "version": "1.0.0",
-  "main": "dist/gridjson.bundle.js",
+  "main": "dist/zera.js",
   "license": "MIT",
   "dependencies": {
     "eslint": "^4.10.0",
