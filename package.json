@@ -1,5 +1,5 @@
 {
-  "name": "@iagolast/zera",
+  "name": "iagolast-zera",
   "version": "1.0.1",
   "main": "dist/zera.js",
   "license": "MIT",
