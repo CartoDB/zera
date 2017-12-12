@@ -1,6 +1,6 @@
 {
-  "name": "iagolast-zera",
-  "version": "1.0.3",
+  "name": "carto-zera",
+  "version": "1.0.0",
   "main": "dist/zera.js",
   "license": "MIT",
   "dependencies": {
