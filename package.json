@@ -2,7 +2,7 @@
   "name": "carto-zera",
   "version": "1.0.0",
   "main": "dist/zera.js",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "dependencies": {
     "eslint": "^4.10.0",
     "eslint-config-iagolast": "^1.0.0"
