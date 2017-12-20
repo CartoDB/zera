@@ -543,6 +543,7 @@ var LeafletMap = function () {
         _classCallCheck(this, LeafletMap);
 
         this._map = nativeMap;
+        this._listeners = {};
     }
 
     // LatLong to pixel coords
@@ -562,12 +563,13 @@ var LeafletMap = function () {
     }, {
         key: "on",
         value: function on(event, callback) {
+            this._listeners[event] = callback;
             return this._map.on(event, callback);
         }
     }, {
         key: "off",
         value: function off(event) {
-            return this._map.off(event);
+            return this._map.off(event, this._listeners[event]);
         }
 
         // We need to clone events to avoid mutations causing buggy behaviour
