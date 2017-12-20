@@ -3,33 +3,30 @@ const Interactivity = require('../lib/index').Interactive;
 
 describe('leafletMap', () => {
     describe('.off', () => {
-        test('should unsuscribe only suscribed events', () => {
+        test('should remove only events suscribed by zera', () => {
             const event = { latlng: { wrap: () => { return { lat: 42, lng: -8 } } } };
             const map = new leaflet.map(document.createElement('div')).setView([51.505, -0.09], 13);
             const interactivity = new Interactivity();
-            const callback0 = jest.fn();
-            const callback1 = jest.fn();
-
+            const nativeLeafletMapCallback = jest.fn();
+            const zeraLeafletMapCallback = jest.fn();
             // Mock loadtile
             interactivity._loadTile = jest.fn(() => Promise.resolve());
 
             interactivity.map(map);
             const leafletMap = interactivity._map;
+            map.on('click', nativeLeafletMapCallback)
+            leafletMap.on('click', zeraLeafletMapCallback);
             
-            map.on('click', callback0)
-            leafletMap.on('click', callback1);
-
+            // Both callbacks should receive the event
             leafletMap._map.fire('click', event);
-
-            expect(callback0).toHaveBeenCalled();
-            expect(callback1).toHaveBeenCalled();
-
+            expect(nativeLeafletMapCallback).toHaveBeenCalledTimes(1);
+            expect(zeraLeafletMapCallback).toHaveBeenCalledTimes(1);
             // Unsuscribe events from leafletmap doesnt affect native map events
-            leafletMap.off('click', callback1);
+            leafletMap.off('click', zeraLeafletMapCallback);
+            // Now only the native callback should receive the event
             leafletMap._map.fire('click', event);
-
-            expect(callback0).toHaveBeenCalledTimes(2);
-            expect(callback1).toHaveBeenCalledTimes(1);
+            expect(nativeLeafletMapCallback).toHaveBeenCalledTimes(2);
+            expect(zeraLeafletMapCallback).toHaveBeenCalledTimes(1);
         });
     });
 });
