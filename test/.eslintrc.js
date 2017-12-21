@@ -1,5 +1,9 @@
 module.exports = {
     env: {
-        jest: true
+        mocha: true,
+    },
+    globals: {
+        expect: true,
+        L: true,
     }
 }

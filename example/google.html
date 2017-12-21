@@ -23,7 +23,7 @@
 <body>
     <div id="map"></div>
     <div id="city"></div>
-    <script src="../dist/gridjson.bundle.js"></script>
+    <script src="../dist/zera.js"></script>
     <script>
         function initMap() {
             var uluru = { lat: 42, lng: -0.08 };
@@ -34,7 +34,7 @@
 
             window.foo = map;
 
-            new gridjson.Interactive()
+            new zera.Interactive()
                 .map(map)
                 .tilejson({
                     grids: ["https://cartojs-test.carto.com/api/v1/map/f2cbe0706e65d9becee338e4900802a8:1508844385822/1/{z}/{x}/{y}.grid.json?api_key=84fdbd587e4a942510270a48e843b4c1baa11e18"]
