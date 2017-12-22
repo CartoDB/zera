@@ -47,10 +47,10 @@ const interactivity = new zera.Interactive(map, '');
 Attach event listeners to map events, only a single listener can be attached for every event type.
 There are only three possible events:
 
-    - **on:** Fired when the user clicks or moves the mouse over a feature. You can distinguish between them using `event.type` property.
-    - **off:** Fired when the user clicks or moves the mouse outside a feature.
-    - **error** Fired when there was an error getting the `grid.json` for a interaction.
-        - This includes `CARTO-429` limit error.
+- **on:** Fired when the user clicks or moves the mouse over a feature. You can distinguish between them using `event.type` property.
+- **off:** Fired when the user clicks or moves the mouse outside a feature.
+- **error** Fired when there was an error getting the `grid.json` for a interaction.
+    - This includes `CARTO-429` limit error.
 
 ```javascript
 zera.on('on', event => {
