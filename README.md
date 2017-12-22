@@ -3,9 +3,7 @@
 Grid json client for `leaflet` and `google maps`.
 
 
-## Getting started
-
-### Installing zera
+## Installing zera
 
     yarn add carto-zera
 
@@ -14,9 +12,9 @@ Grid json client for `leaflet` and `google maps`.
 zera uses [jest](https://facebook.github.io/jest/) for executing the unit tests located under the `__test__ ` folder and 
 [karma with headless chrome](https://developers.google.com/web/updates/2017/06/headless-karma-mocha-chai) for running the tests located under the `test` folder.
 
-### Running the thests
-
 By default you need to be hable to run [headless chrome](https://developers.google.com/web/updates/2017/04/headless-chrome) on your machine. But you can also edit the `karma.config.js` file and change the browser.
+
+### Running the thests
 
     yarn test
 
@@ -28,7 +26,7 @@ zera uses [webpack](https://webpack.js.org/concepts/) to generate an umd bundle 
 
 
 
-### api
+## api
 
 
 #### `new zera.Interactive([map], [gridUrl])`
