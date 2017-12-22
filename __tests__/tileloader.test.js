@@ -27,7 +27,7 @@ describe('TileLoader', () => {
         });
 
         test('should perform a request to the right url', () => {
-            mockFetch.mockReturnValue(Promise.resolve());
+            mockFetch.mockReturnValue(Promise.resolve({status: 200, json: () => {Promise.resolve('ok')}}));
            
             expect(mockFetch).not.toHaveBeenCalled();
             tileLoader.loadTile(0,0,0);

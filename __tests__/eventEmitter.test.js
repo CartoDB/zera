@@ -1,6 +1,6 @@
 const EventEmitter = require('../lib/eventEmitter');
 
-describe('eventEmitter', () => {
+fdescribe('eventEmitter', () => {
     describe('.addEventListener', () => {
         test('should add a new listener to the list', () => {
             const eventEmitter = new EventEmitter();

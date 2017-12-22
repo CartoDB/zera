@@ -27,8 +27,10 @@
   },
   "scripts": {
     "build": "webpack",
-    "test": "jest",
-    "test:e2e": "karma start --single-run --browsers ChromeHeadless karma.config.js",
-    "test:watch": "jest --watch"
+    "test": "yarn test:unit && yarn test:e2e",
+    "test:unit": "jest",
+    "test:e2e": "karma start --single-run karma.config.js",
+    "test:unit:watch": "jest --watch",
+    "test:e2e:watch": "karma start karma.config.js"
   }
 }

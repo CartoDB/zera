@@ -148,9 +148,9 @@ var Interactive = function () {
         }
 
         /**
-         * Attach event listeners to map events
-         * @param {*} event 
-         * @param {*} callback 
+         * Attach event listeners to map events.
+         * @param {on|off|error} event - The name of the event 
+         * @param {function} callback - The callback to be executed when the event is fired
          */
 
     }, {
@@ -187,6 +187,8 @@ var Interactive = function () {
                 if (tile !== 'fetching') {
                     return _this._objectForEvent(tile, eventClone, 'click');
                 }
+            }).catch(function (err) {
+                _this._eventEmitter.dispatchEvent('error', err);
             });
         }
 
@@ -206,6 +208,8 @@ var Interactive = function () {
                 if (tile !== 'fetching') {
                     return _this2._objectForEvent(tile, eventClone, 'mousemove');
                 }
+            }).catch(function (err) {
+                _this2._eventEmitter.dispatchEvent('error', err);
             });
         }
 
@@ -233,9 +237,9 @@ var Interactive = function () {
 
         /**
          * Get the data from a map event.
-         * Using the event coords, get the data from the grid.json data stored in the cache.
+         * Using the event coords and the grid.json tile.
          * 
-         * This method Trigger an event with a `data` property. 
+         * This method fires an event with a `data` property. 
          * 
          * Warning: This method mutates the event object!
          */
@@ -306,11 +310,7 @@ var Interactive = function () {
     }, {
         key: 'remove',
         value: function remove() {
-            this._eventEmitter.removeEventListener('mousemove');
-            this._eventEmitter.removeEventListener('click');
-            this._eventEmitter.removeEventListener('error');
-            this._eventEmitter.removeEventListener('featureout');
-
+            this._eventEmitter.clear();
             // Remove native map listeners
             this._map.off('click');
             this._map.off('mousemove');
@@ -568,6 +568,16 @@ var EventEmitter = function () {
                 case 'error':
                     delete this._listeners.error;
             }
+        }
+    }, {
+        key: 'clear',
+        value: function clear() {
+            this._listeners = {
+                click: undefined,
+                move: undefined,
+                out: undefined,
+                error: undefined
+            };
         }
     }]);
 

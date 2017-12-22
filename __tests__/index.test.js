@@ -1,7 +1,6 @@
 const zera = require('../lib/index');
 const GoogleMap = require('../lib/map/google');
 const LeafletMap = require('../lib/map/leaflet');
-const EventEmitter = require('events');
 
 describe('zera', () => {
     let interactivity;
