@@ -1,6 +1,6 @@
 # zera
 
-Grid json client for `leaflet` and `google maps`.
+Grid json client for `Leaflet` and `Google Maps`.
 
 
 ## Installing zera
