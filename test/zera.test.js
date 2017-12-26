@@ -33,7 +33,7 @@ describe('Zera', () => {
             zera.on('off', event => {
                 expect(event).to.be.undefined;
                 done();
-            })
+            });
         });
 
         it('should return a featureOff (off) event when the user moves the mouse outside a feature ', done => {
