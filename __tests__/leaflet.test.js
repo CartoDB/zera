@@ -10,7 +10,7 @@ describe('leafletMap', () => {
             const nativeLeafletMapCallback = jest.fn();
             const zeraLeafletMapCallback = jest.fn();
             // Mock loadtile
-            interactivity._loadTile = jest.fn(() => Promise.resolve());
+            interactivity._tileLoader.loadTile = jest.fn(() => Promise.resolve());
 
             interactivity.map(map);
             const leafletMap = interactivity._map;

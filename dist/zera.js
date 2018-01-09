@@ -85,6 +85,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Map = __webpack_require__(1);
+var EventEmitter = __webpack_require__(4);
+var TileLoader = __webpack_require__(5);
 
 /**
  * 
@@ -92,72 +94,17 @@ var Map = __webpack_require__(1);
 
 var Interactive = function () {
     function Interactive(map, gridUrl) {
-        var _this = this;
-
         _classCallCheck(this, Interactive);
 
         // Map element
-        this._map = map && new Map(map);
-        // Object with the grid.json cached data
-        this._cache = {};
-        // Url template for the grid tiles
-        this._url = gridUrl;
+        if (map) {
+            this._bindMap(map);
+        }
+        this._tileLoader = new TileLoader(gridUrl);
         // We asume 256x256px tiles
         this._tileSize = 256;
         // At the moment only one callback is supported so a custom event emitter is used.
-        this._eventEmitter = {
-            dispatchEvent: function dispatchEvent(event, data) {
-                switch (event) {
-                    case 'mousemove':
-                        _this._listeners.move && _this._listeners.move(data);
-                        break;
-                    case 'click':
-                        _this._listeners.click && _this._listeners.click(data);
-                        break;
-                    case 'featureout':
-                        _this._listeners.out && _this._listeners.out();
-                        break;
-                    case 'error':
-                        _this._listeners.error && _this._listeners.error(data);
-                }
-            },
-            addEventListener: function addEventListener(event, callback) {
-                switch (event) {
-                    case 'mousemove':
-                        _this._listeners.move = callback;
-                        break;
-                    case 'click':
-                        _this._listeners.click = callback;
-                        break;
-                    case 'featureout':
-                        _this._listeners.out = callback;
-                        break;
-                    case 'error':
-                        _this._listeners.error = callback;
-                }
-            },
-            removeEventListener: function removeEventListener(event) {
-                switch (event) {
-                    case 'mousemove':
-                        delete _this._listeners.move;
-                        break;
-                    case 'click':
-                        delete _this._listeners.click;
-                        break;
-                    case 'featureout':
-                        delete _this._listeners.out;
-                        break;
-                    case 'error':
-                        delete _this._listeners.error;
-                }
-            }
-            // Callbacks for every event
-        };this._listeners = {
-            click: undefined,
-            move: undefined,
-            out: undefined,
-            error: undefined
-        };
+        this._eventEmitter = new EventEmitter();
     }
 
     /**
@@ -170,7 +117,7 @@ var Interactive = function () {
     _createClass(Interactive, [{
         key: 'tilejson',
         value: function tilejson(_tilejson) {
-            this._url = _tilejson.grids[0];
+            this._tileLoader.setUrl(_tilejson.grids[0]);
             return this;
         }
 
@@ -183,16 +130,27 @@ var Interactive = function () {
     }, {
         key: 'map',
         value: function map(_map) {
-            this._map = new Map(_map);
-            this._map.on('click', this._onMapClick.bind(this));
-            this._map.on('mousemove', this._onMapMouseMove.bind(this));
+            this._bindMap(_map);
             return this;
         }
 
         /**
-         * Attach event listeners to map events
-         * @param {*} event 
-         * @param {*} callback 
+         * Attach a native map to the interactivity object.
+         * @param {*} map 
+         */
+
+    }, {
+        key: '_bindMap',
+        value: function _bindMap(map) {
+            this._map = new Map(map);
+            this._map.on('click', this._onMapClick.bind(this));
+            this._map.on('mousemove', this._onMapMouseMove.bind(this));
+        }
+
+        /**
+         * Attach event listeners to map events.
+         * @param {on|off|error} event - The name of the event 
+         * @param {function} callback - The callback to be executed when the event is fired
          */
 
     }, {
@@ -221,12 +179,16 @@ var Interactive = function () {
     }, {
         key: '_onMapClick',
         value: function _onMapClick(e) {
-            var _this2 = this;
+            var _this = this;
 
             var eventClone = this._map.cloneEvent(e);
             var coords = this._getTileCoordsFromMouseEvent(eventClone);
-            this._loadTile(coords.z, coords.x, coords.y).then(function () {
-                return _this2._objectForEvent(eventClone, 'click');
+            this._tileLoader.loadTile(coords.z, coords.x, coords.y).then(function (tile) {
+                if (tile !== 'fetching') {
+                    return _this._objectForEvent(tile, eventClone, 'click');
+                }
+            }).catch(function (err) {
+                _this._eventEmitter.dispatchEvent('error', err);
             });
         }
 
@@ -238,12 +200,16 @@ var Interactive = function () {
     }, {
         key: '_onMapMouseMove',
         value: function _onMapMouseMove(e) {
-            var _this3 = this;
+            var _this2 = this;
 
             var eventClone = this._map.cloneEvent(e);
             var coords = this._getTileCoordsFromMouseEvent(eventClone);
-            this._loadTile(coords.z, coords.x, coords.y).then(function () {
-                return _this3._objectForEvent(eventClone, 'mousemove');
+            this._tileLoader.loadTile(coords.z, coords.x, coords.y).then(function (tile) {
+                if (tile !== 'fetching') {
+                    return _this2._objectForEvent(tile, eventClone, 'mousemove');
+                }
+            }).catch(function (err) {
+                _this2._eventEmitter.dispatchEvent('error', err);
             });
         }
 
@@ -270,76 +236,17 @@ var Interactive = function () {
         }
 
         /**
-         * Load a grid.json tile from the coords using a cache system to improve performance.
-         * @param {*} z 
-         * @param {*} x 
-         * @param {*} y 
-         */
-
-    }, {
-        key: '_loadTile',
-        value: function _loadTile(z, x, y) {
-            var _this4 = this;
-
-            // If already cached the request is ignored.
-            if (this._cache[z + '_' + x + '_' + y]) {
-                return Promise.resolve();
-            }
-            // Mark the tile as "fetching" to prevent duplicated requests. The value will be async obtained.
-            this._cache[z + '_' + x + '_' + y] = 'fetching';
-            return fetch(this._buildTileUrl(z, x, y))
-            // On server limit errors reject throw a featureError
-            .then(this._handleLimitErrors).then(function (data) {
-                return _this4._cache[z + '_' + x + '_' + y] = data;
-            }).catch(function (data) {
-                return _this4._eventEmitter.dispatchEvent('error', data);
-            });
-        }
-
-        /**
-         * When the server returns a 429 we want to throw an especific error.
-         */
-
-    }, {
-        key: '_handleLimitErrors',
-        value: function _handleLimitErrors(response) {
-            if (response.status === 429) {
-                return response.json().then(function (data) {
-                    return Promise.reject(data);
-                });
-            }
-            return response.json();
-        }
-
-        /**
-         * Builds the tile url from the coords.
-         * @param {*} z 
-         * @param {*} x 
-         * @param {*} y 
-         */
-
-    }, {
-        key: '_buildTileUrl',
-        value: function _buildTileUrl(z, x, y) {
-            var url = this._url;
-            url = url.replace(/{z}/, z);
-            url = url.replace(/{x}/, x);
-            url = url.replace(/{y}/, y);
-            return url;
-        }
-
-        /**
          * Get the data from a map event.
-         * Using the event coords, get the data from the grid.json data stored in the cache.
+         * Using the event coords and the grid.json tile.
          * 
-         * This method Trigger an event with a `data` property. 
+         * This method fires an event with a `data` property. 
          * 
          * Warning: This method mutates the event object!
          */
 
     }, {
         key: '_objectForEvent',
-        value: function _objectForEvent(event, eventType) {
+        value: function _objectForEvent(tile, event, eventType) {
             var point = this._map.project(event);
             // 4 pixels asigned to each grid in the utfGrid.
             var resolution = 4;
@@ -352,8 +259,6 @@ var Interactive = function () {
             var max = Math.pow(2, this._map.getZoom());
             x = (x + max) % max;
             y = (y + max) % max;
-
-            var tile = this._cache[this._map.getZoom() + '_' + x + '_' + y];
 
             if (tile && tile.grid) {
                 var gridX = Math.floor((point.x - x * this._tileSize) / resolution);
@@ -405,11 +310,7 @@ var Interactive = function () {
     }, {
         key: 'remove',
         value: function remove() {
-            this._eventEmitter.removeEventListener('mousemove');
-            this._eventEmitter.removeEventListener('click');
-            this._eventEmitter.removeEventListener('error');
-            this._eventEmitter.removeEventListener('featureout');
-
+            this._eventEmitter.clear();
             // Remove native map listeners
             this._map.off('click');
             this._map.off('mousemove');
@@ -592,6 +493,188 @@ var LeafletMap = function () {
 }();
 
 module.exports = LeafletMap;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EventEmitter = function () {
+    function EventEmitter() {
+        _classCallCheck(this, EventEmitter);
+
+        // Callbacks for every event
+        this._listeners = {
+            click: undefined,
+            move: undefined,
+            out: undefined,
+            error: undefined
+        };
+    }
+
+    _createClass(EventEmitter, [{
+        key: 'dispatchEvent',
+        value: function dispatchEvent(event, data) {
+            switch (event) {
+                case 'mousemove':
+                    this._listeners.move && this._listeners.move(data);
+                    break;
+                case 'click':
+                    this._listeners.click && this._listeners.click(data);
+                    break;
+                case 'featureout':
+                    this._listeners.out && this._listeners.out();
+                    break;
+                case 'error':
+                    this._listeners.error && this._listeners.error(data);
+            }
+        }
+    }, {
+        key: 'addEventListener',
+        value: function addEventListener(event, callback) {
+            switch (event) {
+                case 'mousemove':
+                    this._listeners.move = callback;
+                    break;
+                case 'click':
+                    this._listeners.click = callback;
+                    break;
+                case 'featureout':
+                    this._listeners.out = callback;
+                    break;
+                case 'error':
+                    this._listeners.error = callback;
+            }
+        }
+    }, {
+        key: 'removeEventListener',
+        value: function removeEventListener(event) {
+            switch (event) {
+                case 'mousemove':
+                    delete this._listeners.move;
+                    break;
+                case 'click':
+                    delete this._listeners.click;
+                    break;
+                case 'featureout':
+                    delete this._listeners.out;
+                    break;
+                case 'error':
+                    delete this._listeners.error;
+            }
+        }
+    }, {
+        key: 'clear',
+        value: function clear() {
+            this._listeners = {
+                click: undefined,
+                move: undefined,
+                out: undefined,
+                error: undefined
+            };
+        }
+    }]);
+
+    return EventEmitter;
+}();
+
+module.exports = EventEmitter;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TileLoader = function () {
+    function TileLoader(gridUrl) {
+        _classCallCheck(this, TileLoader);
+
+        this._url = gridUrl;
+        this._cache = {};
+    }
+
+    _createClass(TileLoader, [{
+        key: 'setUrl',
+        value: function setUrl(newValue) {
+            this._url = newValue;
+        }
+
+        /**
+         * Load a grid.json tile from the coords using a cache system to improve performance.
+         * @param {number} z 
+         * @param {number} x 
+         * @param {number} y 
+         */
+
+    }, {
+        key: 'loadTile',
+        value: function loadTile(z, x, y) {
+            var _this = this;
+
+            // If already cached the request is ignored.
+            if (this._cache[z + '_' + x + '_' + y]) {
+                return Promise.resolve(this._cache[z + '_' + x + '_' + y]);
+            }
+            // Mark the tile as "fetching" to prevent duplicated requests. The value will be async obtained.
+            this._cache[z + '_' + x + '_' + y] = 'fetching';
+
+            return fetch(this._buildTileUrl(z, x, y))
+            // On server limit errors reject throw a featureError
+            .then(this._handleLimitErrors).then(function (data) {
+                _this._cache[z + '_' + x + '_' + y] = data;
+                return data;
+            });
+        }
+
+        /**
+         * Builds the tile url from the coords.
+         * @param {number} z 
+         * @param {number} x 
+         * @param {number} y 
+         */
+
+    }, {
+        key: '_buildTileUrl',
+        value: function _buildTileUrl(z, x, y) {
+            var url = this._url;
+            url = url.replace(/{z}/, z);
+            url = url.replace(/{x}/, x);
+            url = url.replace(/{y}/, y);
+            return url;
+        }
+
+        /**
+         * When the server returns a 429 we want to throw an especific error.
+         */
+
+    }, {
+        key: '_handleLimitErrors',
+        value: function _handleLimitErrors(response) {
+            if (response.status === 429) {
+                return response.json().then(function (data) {
+                    return Promise.reject(data);
+                });
+            }
+            return response.json();
+        }
+    }]);
+
+    return TileLoader;
+}();
+
+module.exports = TileLoader;
 
 /***/ })
 /******/ ]);

@@ -8,7 +8,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet-src.js"></script>
-    <script src="../dist/gridjson.bundle.js"></script>
+    <script src="../dist/zera.js"></script>
     <style>
         #map {
             height: 100vh;
@@ -23,23 +23,25 @@
 <script>
     var map = L.map('map').setView([42, -0.08], 5);
     var baseLayer = L.tileLayer('https://cartodb-basemaps-d.global.ssl.fastly.net/rastertiles/voyager_nolabels/{z}/{x}/{y}.png');
-    var cartoLayer = L.tileLayer('https://cartojs-test.carto.com/api/v1/map/f2cbe0706e65d9becee338e4900802a8:1508844385822/1/{z}/{x}/{y}.png?api_key=84fdbd587e4a942510270a48e843b4c1baa11e18');
+    var cartoLayer = L.tileLayer('https://cartocdn-ashbu_a.global.ssl.fastly.net/iago-carto/api/v1/map/bc96e58d7b2bcacf24b384022dd8dcca:1513790171194/1/{z}/{x}/{y}.png?api_key=552dc6b016acb007acf0b9091719be8d0a37847b');
 
     baseLayer.addTo(map);
     cartoLayer.addTo(map);
 
     var poup = L.popup();
-    new gridjson.Interactive()
-        .map(map)
+    var interactive = new zera.Interactive();
+    
+    interactive.map(map)
         .tilejson({
-            grids: ["https://cartojs-test.carto.com/api/v1/map/f2cbe0706e65d9becee338e4900802a8:1508844385822/1/{z}/{x}/{y}.grid.json?api_key=84fdbd587e4a942510270a48e843b4c1baa11e18"]
+            grids: ["https://cartocdn-ashbu_a.global.ssl.fastly.net/iago-carto/api/v1/map/91b917902448f8addcfd89d15a02b2f2:1510838928849/1/{z}/{x}/{y}.grid.json?api_key=552dc6b016acb007acf0b9091719be8d0a37847b"]
         })
         .on('on', event => {
             poup.setLatLng(event.latlng);
-            poup.setContent(`<h5>${event.data.nameascii}</h5>`);
+            poup.setContent(`<h5>${event.data.name}</h5> <h6> ${event.type} </h6>`);
             poup.openOn(map);
         })
         .on('off', event => {
+            console.warn(event);
             map.closePopup(poup);
         });
 
