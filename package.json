@@ -1,5 +1,5 @@
 {
-  "name": "carto-zera",
+  "name": "@carto/zera",
   "version": "1.0.3",
   "main": "dist/zera.js",
   "license": "BSD-3-Clause",
@@ -31,6 +31,7 @@
   },
   "scripts": {
     "build": "webpack",
+    "bump": "npm version patch",
     "test": "yarn test:unit && yarn test:e2e",
     "test:unit": "jest",
     "test:e2e": "karma start --single-run",

@@ -5,11 +5,11 @@ Grid json client for `Leaflet` and `Google Maps`.
 
 ## Installing zera
 
-    yarn add carto-zera
+    yarn add @carto/zera
 
 ## Testing
 
-zera uses [jest](https://facebook.github.io/jest/) for executing the unit tests located under the `__test__ ` folder and 
+zera uses [jest](https://facebook.github.io/jest/) for executing the unit tests located under the `__test__ ` folder and
 [karma with headless chrome](https://developers.google.com/web/updates/2017/06/headless-karma-mocha-chai) for running the tests located under the `test` folder.
 
 By default you need to be able to run [headless chrome](https://developers.google.com/web/updates/2017/04/headless-chrome) on your machine. But you can also edit the `karma.config.js` file and change the browser.
@@ -36,7 +36,7 @@ Creates a new `zera` object.
 `map` is a reference to the native google|leaflet map and `gridUrl` is a string pointing to the grid.json url server.
 
 
-```javascript 
+```javascript
 const map = L.map('map').setView([42, -0.08], 5);
 const gridUrl = 'https://carto.com/map_id/1/{z}/{x}/{y}.grid.json';
 const interactivity = new zera.Interactive(map, '');
