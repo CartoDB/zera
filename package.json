@@ -1,6 +1,6 @@
 {
   "name": "@carto/zera",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "dist/zera.js",
   "license": "BSD-3-Clause",
   "files": [
