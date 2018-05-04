@@ -3,6 +3,7 @@
   "version": "1.0.4",
   "main": "dist/zera.js",
   "license": "BSD-3-Clause",
+  "files": ["dist"],
   "dependencies": {},
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.4",
@@ -32,6 +33,7 @@
   "scripts": {
     "build": "webpack",
     "bump": "npm version patch",
+    "preversion": "yarn build",
     "test": "yarn test:unit && yarn test:e2e",
     "test:unit": "jest",
     "test:e2e": "karma start --single-run",
